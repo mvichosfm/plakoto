@@ -4,8 +4,8 @@
 // check against the engine.
 //
 // Everything here is written in the numbering a player SEES (records.shown): point 1 is the
-// player's start (far right), 12 the far-left corner, 13-24 the near rail, home is 19-24 and
-// bearing off is "after 24". The computer travels the other way round: it starts on the player's
+// player's start (bottom left), 1-12 run left to right along the near rail, 13-24 right to left
+// along the far rail, home is 19-24 (top left) and bearing off is "after 24". The computer travels the other way round: it starts on the player's
 // 24 and its home is the player's 1-6, so a computer checker on shown point s stands on its OWN
 // point s. The engine counts the player's side the other way (r = 25 - shown); boardFrom /
 // lessonSteps convert.
@@ -31,7 +31,7 @@ export const LESSONS = [
   {
     id: 'direction', title: 'The board and the two ways round',
     mine: { 1: 15 }, opp: { 24: 15 }, dice: [2, 1], goal: [4],
-    teach: `<p>You are the ivory checkers and all fifteen start on <b>point 1</b>, far right. You travel <b>1 to 12 along the far rail, then 13 to 24 along the near rail</b>; your home is <b>19–24</b>. The computer goes the <b>other way round</b>: it starts on your <b>24</b> — inside your home — and its home is your <b>1–6</b>. Every checker of yours meets every checker of its head-on. The gold numbers on the rails stay on during the lessons.</p>`,
+    teach: `<p>You are the ivory checkers and all fifteen start on <b>point 1</b>, bottom left. You travel <b>1 to 12 along the near rail (left to right), then 13 to 24 along the far rail (right to left)</b>; your home is <b>19–24</b>, top left. The computer goes the <b>other way round</b>: it starts on your <b>24</b>, top left — inside your home — and its home is your <b>1–6</b>, bottom left. Every checker of yours meets every checker of its head-on. The gold numbers on the rails stay on during the lessons.</p>`,
     task: `You rolled <b>2–1</b>. Move one checker 3 points forward, to the glowing point <b>4</b>. Click a glowing checker, then a point — or drag the checker there.`,
     check: (v) => v.mine[rOf(4)] === 1 && v.mine[rOf(1)] === 14,
     answer: [{ from: 1, to: 3, d: 2 }, { from: 3, to: 4, d: 1 }],

@@ -119,8 +119,8 @@ and every figure is quoted with the sample it came from (see <a href="#method">h
 <section class="card" id="map">
   <p class="kicker">Orientation</p>
   <h2>The board from your seat</h2>
-  <p>The numbers are <b>your</b> points, as printed on the rails (Settings → Point numbers): your start is 1, far right, and your home is 19–24, near right.
-  The computer comes the <b>other way round</b>: it starts on your 24 — inside your home — and its home is your 1–6, right where you start.
+  <p>The numbers are <b>your</b> points, as printed on the rails (Settings → Point numbers): your start is 1, bottom left, and your home is 19–24, top left.
+  The computer comes the <b>other way round</b>: it starts on your 24, top left — inside your home — and its home is your 1–6, right where you start.
   So every one of your checkers meets every one of its checkers head-on, and each side's starting point sits in the other side's home.</p>
   <div class="fig" data-fig="boardMap"></div>
   <div class="legend"><span><i style="background:var(--gold)"></i>your way round, 1 → 24, then off</span><span><i style="background:var(--silver)"></i>the computer's way round</span></div>
@@ -226,8 +226,8 @@ and every figure is quoted with the sample it came from (see <a href="#method">h
 <section class="card" id="map-el">
   <p class="kicker">Προσανατολισμός</p>
   <h2>Το ταμπλό από τη θέση σου</h2>
-  <p>Τα νούμερα είναι <b>τα δικά σου</b> σημεία, όπως είναι τυπωμένα στο πλαίσιο (Settings → Point numbers): η αφετηρία σου είναι το 1, πάνω δεξιά, και το σπίτι σου το 19–24, κάτω δεξιά.
-  Ο υπολογιστής έρχεται από την <b>αντίθετη μεριά</b>: ξεκινά από το δικό σου 24 — μέσα στο σπίτι σου — και το σπίτι του είναι το δικό σου 1–6, ακριβώς εκεί που ξεκινάς εσύ.
+  <p>Τα νούμερα είναι <b>τα δικά σου</b> σημεία, όπως είναι τυπωμένα στο πλαίσιο (Settings → Point numbers): η αφετηρία σου είναι το 1, κάτω αριστερά, και το σπίτι σου το 19–24, πάνω αριστερά.
+  Ο υπολογιστής έρχεται από την <b>αντίθετη μεριά</b>: ξεκινά από το δικό σου 24, πάνω αριστερά — μέσα στο σπίτι σου — και το σπίτι του είναι το δικό σου 1–6, ακριβώς εκεί που ξεκινάς εσύ.
   Έτσι κάθε πούλι σου συναντά κατά μέτωπο κάθε πούλι του, και η αφετηρία του καθενός βρίσκεται μέσα στο σπίτι του άλλου.</p>
   <div class="fig" data-fig="boardMap"></div>
   <div class="legend"><span><i style="background:var(--gold)"></i>η δική σου διαδρομή, 1 → 24 και έξω</span><span><i style="background:var(--silver)"></i>η διαδρομή του υπολογιστή</span></div>
@@ -340,7 +340,8 @@ const T = {
     nOf: (n) => `${n} πλακώματα` },
 };
 
-// the board from the player's seat: points 1-12 along the far rail (right to left), 13-24 along the near rail
+// the board from the player's seat (as the game draws it): points 1-12 along the near rail (left to
+// right, start bottom left), 13-24 along the far rail (right to left, home top left)
 function boardMap(host, lang) {
   const t = T[lang], W = 640, H = 390;
   const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${t.youStart}, ${t.youHome}, ${t.cpuStart}, ${t.cpuHome}` });
@@ -352,9 +353,9 @@ function boardMap(host, lang) {
     const cx = px(k);
     svg.append(el('path', { d: `M${cx - pw / 2 + 2} ${top}L${cx + pw / 2 - 2} ${top}L${cx} ${top + len}Z`, fill: k % 2 ? 'var(--pa)' : 'var(--pb)', opacity: 0.85 }));
     svg.append(el('path', { d: `M${cx - pw / 2 + 2} ${bottom}L${cx + pw / 2 - 2} ${bottom}L${cx} ${bottom - len}Z`, fill: k % 2 ? 'var(--pb)' : 'var(--pa)', opacity: 0.85 }));
-    // far rail: point 12 on the left ... 1 on the right; near rail: 13 on the left ... 24 on the right
-    svg.append(el('text', { x: cx, y: top - 7, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--dim)' }, String(12 - k)));
-    svg.append(el('text', { x: cx, y: bottom + 16, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--dim)' }, String(13 + k)));
+    // far rail: point 24 on the left ... 13 on the right; near rail: 1 on the left ... 12 on the right
+    svg.append(el('text', { x: cx, y: top - 7, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--dim)' }, String(24 - k)));
+    svg.append(el('text', { x: cx, y: bottom + 16, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--dim)' }, String(1 + k)));
   }
   const defs = el('defs');
   for (const [id, c] of [['mg', '#e8b75a'], ['ms', '#b9c3cc']]) {
@@ -366,23 +367,23 @@ function boardMap(host, lang) {
   const arrow = (d, color, id) => svg.append(el('path', { d, fill: 'none', stroke: color, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'marker-end': `url(#${id})` }));
   // four lanes between the point tips: yours on the outside, the computer's inside
   const yA = top + len + 14, yB = top + len + 32, yC = bottom - len - 32, yD = bottom - len - 14;
-  const L = px(0) - 4, Rt = px(11) + 8;
-  // yours: from 1 (far right) leftwards, round the left end, then rightwards to 24 and off
-  arrow(`M${Rt} ${yA}L${L + 26} ${yA}Q${L - 6} ${yA} ${L - 6} ${(yA + yD) / 2}Q${L - 6} ${yD} ${L + 26} ${yD}L${Rt} ${yD}`, '#e8b75a', 'mg');
-  // the computer's: from your 24 (near right) leftwards, round the left end, then rightwards to your 1-6 and off
-  arrow(`M${Rt - 4} ${yC}L${L + 40} ${yC}Q${L + 16} ${yC} ${L + 16} ${(yB + yC) / 2}Q${L + 16} ${yB} ${L + 40} ${yB}L${Rt - 4} ${yB}`, '#b9c3cc', 'ms');
+  const L = px(0) - 8, Rr = px(11) + 4;
+  // yours: from 1 (bottom left) rightwards, round the right end, then leftwards to 24 and off
+  arrow(`M${L} ${yD}L${Rr - 26} ${yD}Q${Rr + 6} ${yD} ${Rr + 6} ${(yA + yD) / 2}Q${Rr + 6} ${yA} ${Rr - 26} ${yA}L${L} ${yA}`, '#e8b75a', 'mg');
+  // the computer's: from your 24 (top left) rightwards, round the right end, then leftwards to your 1-6 and off
+  arrow(`M${L + 4} ${yB}L${Rr - 40} ${yB}Q${Rr - 16} ${yB} ${Rr - 16} ${(yB + yC) / 2}Q${Rr - 16} ${yC} ${Rr - 40} ${yC}L${L + 4} ${yC}`, '#b9c3cc', 'ms');
   // start markers on the two start points
-  svg.append(el('circle', { cx: px(11), cy: top + 12, r: 9, fill: '#f4ead8', stroke: '#e8b75a', 'stroke-width': 2.5 }));
-  svg.append(el('circle', { cx: px(11), cy: bottom - 12, r: 9, fill: '#3b2618', stroke: '#b9c3cc', 'stroke-width': 2.5 }));
-  // region labels in the margins, over / under the right half
-  const half = (px(6) + px(11)) / 2;
+  svg.append(el('circle', { cx: px(0), cy: bottom - 12, r: 9, fill: '#f4ead8', stroke: '#e8b75a', 'stroke-width': 2.5 }));
+  svg.append(el('circle', { cx: px(0), cy: top + 12, r: 9, fill: '#3b2618', stroke: '#b9c3cc', 'stroke-width': 2.5 }));
+  // region labels in the margins, over / under the left half
+  const half = (px(0) + px(5)) / 2;
   const two = (y, a, ca, b, cb) => {
     const tx = el('text', { x: half, y, 'text-anchor': 'middle', 'font-size': 12.5, 'font-weight': 600 });
     tx.append(el('tspan', { fill: ca }, a), el('tspan', { fill: 'var(--dim)' }, '  ·  '), el('tspan', { fill: cb }, b));
     svg.append(tx);
   };
-  two(22, t.youStart, '#e8b75a', t.cpuHome, '#b9c3cc');
-  two(H - 12, t.youHome, '#e8b75a', t.cpuStart, '#b9c3cc');
+  two(22, t.youHome, '#e8b75a', t.cpuStart, '#b9c3cc');
+  two(H - 12, t.youStart, '#e8b75a', t.cpuHome, '#b9c3cc');
   host.append(svg);
 }
 

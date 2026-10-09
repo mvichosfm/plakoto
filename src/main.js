@@ -22,11 +22,17 @@ const $ = (id) => document.getElementById(id);
 const IS_APP = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 if (IS_APP) document.body.classList.add('app');
 // Engine side 0 = white (ivory), 1 = black. The human picks a colour per game. The board is drawn
-// from the human's seat whatever his colour: his start is always board point 23 (far right) and
-// his home 0-5 (near right); the computer, moving the other way round, starts on 0 (near right,
-// inside the human's home) and bears off from 18-23 (far right). So nothing turns when he plays
-// black - only the checker colours swap. (Fevga turned the stage 180 degrees; with Plakoto's
-// opposite directions a turn would put black's home near LEFT.)
+// from the human's seat whatever his colour: in STAGE coordinates his start is always board point
+// 23 and his home 0-5; the computer, moving the other way round, starts on 0 (inside the human's
+// home) and bears off from 18-23. Only the checker colours swap with the colour choice.
+// The stage itself is ALWAYS turned 180 degrees (STAGE_TURNED, Manos 2026-10-09: "my starting point
+// is bottom left, opponent's top left"), so on screen the human starts BOTTOM LEFT, travels right
+// along the near rail, back left along the far rail, and bears off from the TOP LEFT; the computer
+// starts top left and its home is bottom left. Everything on the stage keeps its stage coordinates
+// (pointX, offPos, pick boxes); anything that depends on where the CAMERA is (the pinned checker's
+// visible crescent, the rail numbers' reading direction) uses facesAway(), and world-space things
+// (dice, table, lights, FOOTPRINT) use world coordinates.
+const STAGE_TURNED = true;
 let HUMAN = 0, CPU = 1;
 // board point (0..23) of side p's own point r (1..24)
 const A = (p, r) => (p === HUMAN ? r - 1 : 24 - r);
@@ -71,15 +77,19 @@ function slotPos(a, k) {
 // Position of the k-th checker (from the bottom) on point a. A pinned point (its bottom checker is
 // the other colour) is drawn as in a real game: the pinner sits ON the pinned checker, slightly off
 // centre so a crescent of the pinned colour stays visible from the player's seat (squarely on top
-// it vanished from view). The crescent must face the camera (+z): on the near side the pinner moves
-// towards the tip; on the far side the pinned checker itself sits towards the tip (moving the
-// pinner there would push it into the rail). Further pinners continue along the point.
+// it vanished from view). The crescent must face the camera: on a point nearer the camera the
+// pinner moves towards the tip; on a point across the board (facesAway) the pinned checker itself
+// sits towards the tip (moving the pinner there would push it into the rail). Further pinners
+// continue along the point.
 const PIN_NUDGE = R * 0.58;
+// is point a on the far side of the board as the player sees it? (the stage is turned 180 degrees)
+const facesAway = (a) => (STAGE_TURNED ? nearSide(a) : !nearSide(a));
+const tipDir = (a) => (nearSide(a) ? -1 : 1); // stage z direction from a point's base towards its tip
 function stackPos(a, k, pinnedBase) {
   if (!pinnedBase) return slotPos(a, k);
   const v = slotPos(a, 0);
-  if (k === 0) { if (!nearSide(a)) v.z += PIN_NUDGE; return v; }
-  if (k === 1) { v.y += CT; if (nearSide(a)) v.z -= PIN_NUDGE; return v; }
+  if (k === 0) { if (facesAway(a)) v.z += tipDir(a) * PIN_NUDGE; return v; }
+  if (k === 1) { v.y += CT; if (!facesAway(a)) v.z += tipDir(a) * PIN_NUDGE; return v; }
   return slotPos(a, k - 1);
 }
 // slides a checker that is not otherwise moving to a new resting spot (a pinned checker making room)
@@ -93,15 +103,18 @@ function shiftTo(mesh, to) {
 const pinnedAt = (a) => stacks[a].length > 1 && stacks[a][0].userData.p !== stacks[a][stacks[a].length - 1].userData.p;
 // where a checker of side p landing on point a goes
 const landPos = (a, p) => stackPos(a, stacks[a].length, stacks[a].length > 0 && stacks[a][0].userData.p !== p);
-// borne-off checkers: neat towers of five on the table beside each home board (the human's near
-// right, the computer's far right; both homes are on the right because the sides travel opposite ways)
+// borne-off checkers: neat towers of five on the table at the RIGHT-hand side of the board as the
+// player sees it - his at the top (level with his top-left home), the computer's at the bottom.
+// Beside the homes would be the left side, where the menu panel covers the human's tray on desktop
+// (it could be neither seen nor clicked). OFF_SIDE = the stage x sign of the screen's right side.
+const OFF_SIDE = STAGE_TURNED ? -1 : 1;
 function offPos(p, k) {
   const tower = Math.floor(k / 5), lv = k % 5;
   const z = p === HUMAN ? 16 - tower * 4.1 : -16 + tower * 4.1;
-  return new THREE.Vector3(OFF_X, TABLE_Y + lv * CT, z);
+  return new THREE.Vector3(OFF_SIDE * OFF_X, TABLE_Y + lv * CT, z);
 }
-// the dice rest beside the far-left corner (the right-hand side holds both sides' borne-off towers)
-const diceRest = (i) => new THREE.Vector3(-(OFF_X + 1) + i * 2.2 * DSP, TABLE_Y + DS / 2, -12);
+// the dice rest beside the board's bottom-left corner (world space; the right holds the towers)
+const diceRest = (i) => new THREE.Vector3(-(OFF_X + 1) + i * 2.2 * DSP, TABLE_Y + DS / 2, STAGE_TURNED ? 12 : -12);
 
 // ================================================================ renderer / scene
 const canvas = $('scene');
@@ -355,6 +368,7 @@ const checkerGeo = (() => {
 // stage = everything fixed to the board (rotates when the human plays black); the dice,
 // table and lights stay in world space so throws always come from the human's side
 const stage = new THREE.Group();
+if (STAGE_TURNED) stage.rotation.y = Math.PI; // the human starts bottom left (see STAGE_TURNED)
 scene.add(stage);
 const world = new THREE.Group();
 stage.add(world);
@@ -447,10 +461,10 @@ function buildBoard() {
     hit.position.set(pointX(a), 0.2, nearSide(a) ? FZ - (PL + 2) / 2 : -FZ + (PL + 2) / 2);
     hit.userData.point = a; world.add(hit); hitMeshes.push(hit);
   }
-  // bear-off area: the near half of the right rail and the table beside it (the far half holds
-  // the computer's borne-off towers)
+  // bear-off area: the half of the right-hand rail (as the player sees it) level with his home, and
+  // the table beside it (the other half holds the computer's borne-off towers)
   offHit = new THREE.Mesh(new THREE.BoxGeometry(RAIL + 9, 3.6, FZ + RAIL + 2), mats.hit);
-  offHit.position.set(FX + (RAIL + 9) / 2, 0, (FZ + RAIL + 2) / 2 - 2);
+  offHit.position.set(OFF_SIDE * (FX + (RAIL + 9) / 2), 0, (FZ + RAIL + 2) / 2 - 2);
   offHit.userData.point = -1; world.add(offHit); hitMeshes.push(offHit);
   offDest = new THREE.Mesh(ringGeo, mats.dest);
   offDest.visible = false; offDest.renderOrder = 4; world.add(offDest);
@@ -466,7 +480,7 @@ function applyNumbers() { const on = showNumbers || !!(puzzle && puzzle.lesson);
 function buildRailNumbers() {
   for (const p of railPlanes) { world.remove(p); p.material.map.dispose(); p.material.dispose(); }
   railPlanes = [];
-  const flip = false; // (Fevga turned the board for black; here it never turns)
+  const flip = STAGE_TURNED; // the planes counter-rotate so the numbers read from the player's seat
   for (const near of [true, false]) {
     const cw = 2048, ch = 64, c = document.createElement('canvas'); c.width = cw; c.height = ch;
     const x2 = c.getContext('2d');
@@ -584,7 +598,7 @@ async function moveChecker(p, from, to) {
   const dst = to === -1 ? offStacks[p] : stacks[to];
   const target = to === -1 ? offPos(p, dst.length) : landPos(to, p); // (onto a lone checker of the other colour: pinned)
   const pins = to !== -1 && dst.length === 1 && dst[0].userData.p !== p;
-  if (pins && !nearSide(to)) shiftTo(dst[0], stackPos(to, 0, true)); // far side: the pinned checker makes room
+  if (pins && facesAway(to)) shiftTo(dst[0], stackPos(to, 0, true)); // across the board: the pinned checker makes room
   dst.push(mesh);
   const start = mesh.position.clone();
   const dist = start.distanceTo(target);
@@ -2742,8 +2756,9 @@ function drawPreview(cv, th) {
     c.strokeStyle = 'rgba(0,0,0,.45)'; c.lineWidth = 1; c.stroke();
   };
   const rx = fx + inset + hw + bar + 5.5 * pw;
-  // the starting position: white on the far right corner, black on the near right corner (Plakoto)
-  for (let i = 0; i < 4; i++) { disc('white', rx, y0 + pw * 0.5 + i * pw * 0.95); disc('black', rx, y0 + fH - pw * 0.5 - i * pw * 0.95); }
+  // the starting position as the player sees it: black (the computer) top left, white (you) bottom left
+  const lx = fx + inset + 0.5 * pw;
+  for (let i = 0; i < 4; i++) { disc('black', lx, y0 + pw * 0.5 + i * pw * 0.95); disc('white', lx, y0 + fH - pw * 0.5 - i * pw * 0.95); }
   const sh = c.createRadialGradient(W * 0.35, H * 0.3, W * 0.1, W * 0.5, H * 0.5, W * 0.75); // studio light
   sh.addColorStop(0, 'rgba(255,240,220,.12)'); sh.addColorStop(1, 'rgba(0,0,0,.35)');
   c.fillStyle = sh; c.fillRect(0, 0, W, H);
@@ -3004,9 +3019,8 @@ let camAnim = null;
 // lock / dimmer row + move bar below), so the home view frames the board in the band between
 // them instead of the whole screen. The bar is reserved at its two-row height so the board does
 // not jump when buttons come and go. Returns null where the panels sit in the corners.
-// What the phone framing must keep in view (world x, z): the board frame, the human's borne-off
-// towers (near right), the computer's (far right - both homes are on the right in Plakoto) and
-// the idle dice (far left).
+// What the phone framing must keep in view (world x, z): the board frame, both sides' borne-off
+// towers (on screen: right, yours at the top) and the idle dice (bottom left).
 // Each entry is [x, z, top]: the box spans y = TABLE_Y (the board's underside / the table) to `top`.
 // The frame is only RAIL_H tall; the tallest thing on the field is a five-high stack near a rail;
 // borne-off towers stand five high on the table.
@@ -3014,8 +3028,9 @@ const STACK_TOP = 5 * CT + 0.2, TOWER_TOP = TABLE_Y + 5 * CT;
 const FOOTPRINT = [
   [-(FX + RAIL), -(FZ + RAIL), RAIL_H], [FX + RAIL, -(FZ + RAIL), RAIL_H], [-(FX + RAIL), FZ + RAIL, RAIL_H], [FX + RAIL, FZ + RAIL, RAIL_H],
   [-(FX - R), -(FZ - R), STACK_TOP], [FX - R, -(FZ - R), STACK_TOP], [-(FX - R), FZ - R, STACK_TOP], [FX - R, FZ - R, STACK_TOP],
-  [OFF_X + R, 16 + R, TOWER_TOP], [OFF_X + R, 7.8 - R, TOWER_TOP], [OFF_X + R, -16 - R, TOWER_TOP], [OFF_X + R, -7.8 + R, TOWER_TOP],
-  [-(OFF_X + 1) - DS / 2, -12 - DS / 2, TABLE_Y + DS], [-(OFF_X + 1) - DS / 2, -12 + DS / 2, TABLE_Y + DS],
+  // borne-off towers (always on the screen's right: world +x) and the idle dice (world, left)
+  ...[16 + R, 7.8 - R, -16 - R, -7.8 + R].map((z) => [OFF_X + R, z, TOWER_TOP]),
+  ...[diceRest(0).z - DS / 2, diceRest(0).z + DS / 2].map((z) => [diceRest(0).x - DS / 2, z, TABLE_Y + DS]),
 ];
 // Which HUD layout the CSS is using: 'land' = phone on its side (max-height 500: left and right
 // rails), 'portrait' = narrow screen (panels above and below), 'desk' = panels in the corners.
