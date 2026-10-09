@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Plakoto - Strategy guide</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%233a2414'/%3E%3Cellipse cx='32' cy='42' rx='19' ry='11' fill='%23f4ead8' stroke='%23c9b796' stroke-width='2'/%3E%3Cellipse cx='32' cy='29' rx='19' ry='11' fill='%233b2618' stroke='%231a0f08' stroke-width='2'/%3E%3Cellipse cx='32' cy='29' rx='11' ry='6' fill='none' stroke='%23614330' stroke-width='1.2'/%3E%3C/svg%3E">
+<style>
+  :root { --gold:#e8b75a; --ink:#f3e9d8; --dim:#b6a78f; --glass:rgba(34,24,16,.72); --edge:rgba(255,226,170,.16);
+    --wood:#3a2415; --wood2:#24160c; --pa:#8a5a32; --pb:#d9c29a; --silver:#b9c3cc; }
+  * { box-sizing:border-box; }
+  [hidden] { display:none !important; }
+  html { background:#0b0807; }
+  body { margin:0; color:var(--ink); background:#0b0807 radial-gradient(ellipse 90% 60% at 50% 0%, #2a1a0f 0%, #0b0807 70%) no-repeat;
+    font:15px/1.6 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  .wrap { max-width:880px; margin:0 auto; padding:max(20px, env(safe-area-inset-top)) 16px max(40px, env(safe-area-inset-bottom)); }
+  .serif, h1, h2 { font-family:Georgia, "Times New Roman", serif; font-weight:600; }
+  a { color:var(--gold); }
+  header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:8px 0 18px; }
+  h1 { margin:0; font-size:40px; line-height:1.05; letter-spacing:.01em; }
+  h1 small { display:block; font:400 13px "Segoe UI", system-ui, sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); margin-top:8px; }
+  .back { font-size:14px; color:var(--ink); text-decoration:none; border:1px solid var(--edge); background:rgba(255,235,200,.08);
+    border-radius:10px; padding:9px 16px; white-space:nowrap; }
+  .back:hover { background:rgba(255,235,200,.18); border-color:rgba(255,226,170,.4); }
+  .tools { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .lang { display:flex; border:1px solid var(--edge); border-radius:10px; overflow:hidden; }
+  .lang button { font:600 13px "Segoe UI", system-ui, sans-serif; letter-spacing:.06em; color:var(--dim); background:rgba(255,235,200,.05);
+    border:none; padding:9px 13px; cursor:pointer; }
+  .lang button + button { border-left:1px solid var(--edge); }
+  .lang button:hover { color:var(--ink); background:rgba(255,235,200,.14); }
+  .lang button.on { color:#2a1a06; background:linear-gradient(#f0c46e,#d79a32); }
+  .lede { color:#e6dccb; font-size:16.5px; max-width:68ch; margin:0 0 18px; }
+  .card { background:var(--glass); border:1px solid var(--edge); border-radius:14px; padding:20px 22px; margin:0 0 18px;
+    box-shadow:0 10px 40px rgba(0,0,0,.3); }
+  h2 { font-size:26px; margin:0 0 4px; }
+  .kicker { font-size:11.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); margin:0 0 2px; }
+  h3 { font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); margin:18px 0 6px; }
+  p { margin:8px 0; max-width:72ch; }
+  ul, ol { margin:8px 0; padding-left:22px; max-width:72ch; }
+  li { margin-bottom:6px; }
+  b { color:#fff4de; }
+  .num { color:var(--gold); font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  nav { display:flex; flex-wrap:wrap; gap:6px; margin:0 0 18px; }
+  nav a { font-size:13px; text-decoration:none; color:var(--dim); border:1px solid var(--edge); border-radius:999px; padding:4px 12px; }
+  nav a:hover { color:var(--ink); border-color:rgba(255,226,170,.4); }
+  .thumbs { counter-reset:t; list-style:none; padding:0; margin:6px 0 0; max-width:none; display:grid; gap:10px; }
+  .thumbs li { counter-increment:t; display:grid; grid-template-columns:34px 1fr; gap:12px; align-items:start; margin:0; }
+  .thumbs li::before { content:counter(t); font:600 20px Georgia, serif; color:#2a1a06; background:linear-gradient(#f0c46e,#d79a32);
+    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+  .fig { margin:14px 0 6px; overflow-x:auto; }
+  .fig svg { display:block; width:100%; min-width:520px; height:auto; }
+  .cap { font-size:12.5px; color:var(--dim); margin:4px 0 0; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 18px; font-size:13px; color:var(--dim); margin-top:8px; }
+  .legend i { display:inline-block; width:22px; height:4px; border-radius:2px; vertical-align:middle; margin-right:6px; }
+  .facts { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:10px; margin:12px 0 4px; }
+  .fact { border:1px solid var(--edge); border-radius:12px; padding:10px 12px; background:rgba(255,235,200,.04); }
+  .fact .big { font:600 28px/1.1 Georgia, serif; color:var(--gold); }
+  .fact .lbl { font-size:12.5px; color:var(--dim); line-height:1.4; margin-top:4px; }
+  .callout { border-left:3px solid var(--gold); background:rgba(232,183,90,.07); padding:10px 14px; border-radius:0 10px 10px 0; margin:12px 0; max-width:72ch; }
+  .callout.warn { border-left-color:#d9826c; background:rgba(200,90,60,.08); }
+  .bars { display:grid; grid-template-columns:auto 1fr auto; gap:6px 10px; align-items:center; max-width:620px; margin:12px 0 4px; font-size:13.5px; }
+  .bars .k { color:var(--dim); white-space:nowrap; }
+  .bars .track { height:16px; background:rgba(255,235,200,.06); border-radius:8px; overflow:hidden; }
+  .bars .fill { height:100%; border-radius:8px; background:linear-gradient(90deg, #a8722a, #f0c46e); }
+  .bars .fill.lo { background:linear-gradient(90deg, #6b4a3a, #b98b6e); }
+  .bars .v { font-variant-numeric:tabular-nums; text-align:right; min-width:7ch; }
+  .bars .v small { color:var(--dim); font-size:11px; }
+  footer { font-size:12.5px; color:var(--dim); margin-top:24px; }
+  footer p { max-width:none; }
+  @media (max-width:600px) {
+    h1 { font-size:32px; }
+    .card { padding:16px 14px; }
+    h2 { font-size:22px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1><span data-lang="en">Πλακωτό strategy<small>How to beat the Expert at Plakoto</small></span><span data-lang="el" hidden>Πλακωτό: στρατηγική<small>Πώς να νικήσεις τον Expert</small></span></h1>
+  <div class="tools">
+    <div class="lang" role="group" aria-label="Language / Γλώσσα">
+      <button type="button" data-set-lang="en" title="English">EN</button><button type="button" data-set-lang="el" title="Ελληνικά">ΕΛ</button>
+    </div>
+    <a class="back" id="back" href="./"><span data-lang="en">← Back to the game</span><span data-lang="el" hidden>← Πίσω στο παιχνίδι</span></a>
+  </div>
+</header>
+
+<!-- ============================================================ ENGLISH -->
+<div data-lang="en">
+<p class="lede">In Plakoto nobody is hit: a lone checker is <b>pinned</b> under the one that lands on it, and stays there until
+the pinner leaves. So the game is about pins — making them, holding them, and never offering one, above all with your
+<b>mother</b>. The advice below comes from the game's own computer players: they played thousands of games against each other,
+and every figure is quoted with the sample it came from (see <a href="#method">how this was measured</a>).</p>
+
+<nav aria-label="Sections">
+  <a href="#thumbs">Rules of thumb</a><a href="#map">The board</a><a href="#pins">1 · Pins</a>
+  <a href="#mother">2 · The mother</a><a href="#safety">3 · Lone checkers</a><a href="#end">4 · How games end</a>
+  <a href="#learn">Learning in the app</a>
+</nav>
+
+<section class="card" id="thumbs">
+  <p class="kicker">In one minute</p>
+  <h2>Five rules of thumb</h2>
+  <ol class="thumbs">
+    <li><div><b>Pin first.</b> The side that makes the first pin of the game wins <span class="num" data-k="firstPinnerWins">–</span>% of games.</div></li>
+    <li><div><b>Count the pins, not the pips.</b> After ten turns each, a side three pins up wins <span class="num" data-k="pinBalanceAt10.3.win">–</span>%; level on pins it is
+      <span class="num" data-k="pinBalanceAt10.0.win">–</span>%; three down, <span class="num" data-k="pinBalanceAt10.-3.win">–</span>%.</div></li>
+    <li><div><b>Never leave your mother alone within reach.</b> A lone mother the computer can reach is pinned on the very next roll
+      <span class="num" data-k="loneMother.pinnedNextRoll">–</span>% of the time — and that is a double loss.</div></li>
+    <li><div><b>Every lone checker is a target.</b> With no lone checker in reach after ten turns you win <span class="num" data-k="loneCheckersAt10.0.win">–</span>%;
+      with two, <span class="num" data-k="loneCheckersAt10.2.win">–</span>%.</div></li>
+    <li><div><b>Double results are common.</b> <span class="num" data-k="ends.mars">–</span>% of games end in a mars and <span class="num" data-k="ends.mother">–</span>% with a pinned mother:
+      play for the big win, and fear the big loss.</div></li>
+  </ol>
+</section>
+
+<section class="card" id="map">
+  <p class="kicker">Orientation</p>
+  <h2>The board from your seat</h2>
+  <p>The numbers are <b>your</b> points, as printed on the rails (Settings → Point numbers): your start is 1, far right, and your home is 19–24, near right.
+  The computer comes the <b>other way round</b>: it starts on your 24 — inside your home — and its home is your 1–6, right where you start.
+  So every one of your checkers meets every one of its checkers head-on, and each side's starting point sits in the other side's home.</p>
+  <div class="fig" data-fig="boardMap"></div>
+  <div class="legend"><span><i style="background:var(--gold)"></i>your way round, 1 → 24, then off</span><span><i style="background:var(--silver)"></i>the computer's way round</span></div>
+</section>
+
+<section class="card" id="pins">
+  <p class="kicker">Chapter 1</p>
+  <h2>Pins decide games</h2>
+  <p>A pinned checker cannot move, the point it stands on becomes the pinner's, and the pinned side has one checker fewer to play with.
+  The side that pins first wins <span class="num" data-k="firstPinnerWins">–</span>% of the time, and the balance of pins after ten turns predicts the result better than anything else we measured:</p>
+  <div class="bars" data-fig="pinBars"></div>
+  <p class="cap">Win rate by pins held minus pins suffered, after each side's tenth turn (Advanced vs Advanced, <span data-k="games">–</span> games).</p>
+  <h3>Where to pin</h3>
+  <p>Any pin is worth having. Pins of computer checkers that still had a long way to go were not worth measurably more than pins near the end of its journey — the pinner went on to win about two games in three wherever the pin was made:</p>
+  <div class="bars" data-fig="pinWhere"></div>
+  <p class="cap">Win rate of the pinning side by how many pips the pinned checker still had to travel (every pin made in the sample).</p>
+  <div class="callout">A pin lasts only while one of your checkers stays on that point. Bring a second checker onto it and you can move one of them without letting go.</div>
+</section>
+
+<section class="card" id="mother">
+  <p class="kicker">Chapter 2</p>
+  <h2>The mother</h2>
+  <p>Your <b>mother</b> is your last checker on your starting point. Pinned there, it loses you the game double — unless the pinner still has checkers on its own start,
+  in which case the game goes on until it empties that start (then you lose double) or you pin its mother back (a tie).</p>
+  <div class="facts">
+    <div class="fact"><div class="big"><span data-k="loneMother.pinnedNextRoll">–</span>%</div><div class="lbl">of the times a lone mother stood within the opponent's reach, it was pinned on the very next roll</div></div>
+    <div class="fact"><div class="big"><span data-k="motherExposed.win">–</span>%</div><div class="lbl">wins for a side that ever left its mother alone within reach (<span data-k="motherExposed.winNever">–</span>% for sides that never did)</div></div>
+    <div class="fact"><div class="big"><span data-k="ends.mother">–</span>%</div><div class="lbl">of all games ended with a pinned mother</div></div>
+  </div>
+  <p>The computer's checkers pass your start on their way home, and its home <i>is</i> your starting corner, so the danger grows as the game goes on.
+  Leave the start with your last <b>two</b> checkers in the same move when you can, and keep at least two there while the computer still has checkers 1–12 pips short of it.</p>
+  <div class="callout warn">The reverse is your chance: if the computer's mother stands alone and your own start is empty, pinning it wins double on the spot.</div>
+</section>
+
+<section class="card" id="safety">
+  <p class="kicker">Chapter 3</p>
+  <h2>Lone checkers</h2>
+  <p>Two checkers on a point are safe; one is a target. A single checker that is itself pinning is safe too — it cannot be pinned back.
+  After ten turns each, the more of your lone checkers stood within the computer's reach, the worse you did:</p>
+  <div class="bars" data-fig="blotBars"></div>
+  <p class="cap">Win rate by the number of your lone checkers the computer could reach (1–12 pips) after your tenth turn.</p>
+  <p>That does not mean "never split". The tuned computer players learned to accept some risk: a lone checker that blocks the computer's way, or that is out of reach of everything, can be worth leaving.
+  What costs games is a lone checker with several computer checkers right behind it.</p>
+</section>
+
+<section class="card" id="end">
+  <p class="kicker">Chapter 4</p>
+  <h2>How games end</h2>
+  <div class="bars" data-fig="endBars"></div>
+  <p class="cap">How the <span data-k="games">–</span> games of the sample ended. Average length: <span data-k="avgTurns">–</span> turns (both sides).</p>
+  <p>A mars (the loser has borne off nothing) counts double, so does a pinned mother. A tie — both mothers pinned — is very rare. The player who starts wins <span class="num" data-k="starterWins">–</span>% of decided games: the first move matters little.</p>
+</section>
+
+<section class="card" id="learn">
+  <p class="kicker">Practice</p>
+  <h2>Learning in the app</h2>
+  <ul>
+    <li><b>Learn</b> — nine short lessons, one rule each, on the real board.</li>
+    <li><b>Mr. Makis</b> (in a game) — plays the strongest move he finds and explains it: pins, the mother, lone checkers at risk.</li>
+    <li><b>Puzzles</b> — positions from computer games where one move is clearly best, confirmed by hundreds of play-outs.</li>
+    <li><b>Review my mistakes</b> (after a game) — Mr. Makis finds your costliest moves and shows them in replay.</li>
+    <li><b>Settings → Show winning chances</b> — the odds of the board as it stands, so you see what a pin is worth.</li>
+  </ul>
+</section>
+
+<section class="card" id="method">
+  <p class="kicker">Method</p>
+  <h2>How this was measured</h2>
+  <p>Every figure comes from <span data-k="games">–</span> games of the Advanced computer level against itself (fixed dice seeds, so the numbers reproduce exactly):
+  <code>node test/strategy-stats.mjs <span data-k="games">–</span> <span data-k="level">–</span></code> in the game's source. They describe what wins between strong players, not rules; a figure measures association, not cause.</p>
+</section>
+</div>
+
+<!-- ============================================================ ΕΛΛΗΝΙΚΑ -->
+<div data-lang="el" lang="el" hidden>
+<p class="lede">Στο πλακωτό κανείς δεν «χτυπιέται»: ένα μοναχό πούλι <b>πλακώνεται</b> από αυτό που πέφτει πάνω του και μένει εκεί μέχρι να φύγει
+όποιος το πλάκωσε. Το παιχνίδι λοιπόν είναι τα πλακώματα — να τα κάνεις, να τα κρατάς και να μη δίνεις ποτέ ευκαιρία, πάνω απ' όλα με τη
+<b>μάνα</b> σου. Οι συμβουλές που ακολουθούν βγήκαν από τους υπολογιστές του ίδιου του παιχνιδιού: έπαιξαν χιλιάδες παρτίδες μεταξύ τους,
+και κάθε νούμερο δίνεται μαζί με το δείγμα του (δες <a href="#method-el">πώς μετρήθηκαν</a>).</p>
+
+<nav aria-label="Ενότητες">
+  <a href="#thumbs-el">Βασικοί κανόνες</a><a href="#map-el">Το ταμπλό</a><a href="#pins-el">1 · Πλακώματα</a>
+  <a href="#mother-el">2 · Η μάνα</a><a href="#safety-el">3 · Μοναχά πούλια</a><a href="#end-el">4 · Πώς τελειώνουν οι παρτίδες</a>
+  <a href="#learn-el">Μάθηση στην εφαρμογή</a>
+</nav>
+
+<section class="card" id="thumbs-el">
+  <p class="kicker">Σε ένα λεπτό</p>
+  <h2>Πέντε βασικοί κανόνες</h2>
+  <ol class="thumbs">
+    <li><div><b>Πλάκωσε πρώτος.</b> Όποιος κάνει το πρώτο πλάκωμα της παρτίδας κερδίζει το <span class="num" data-k="firstPinnerWins">–</span>% των παρτίδων.</div></li>
+    <li><div><b>Μέτρα τα πλακώματα, όχι τους πόντους.</b> Μετά από δέκα ζαριές ο καθένας, όποιος έχει τρία πλακώματα παραπάνω κερδίζει το <span class="num" data-k="pinBalanceAt10.3.win">–</span>%·
+      με ίσα πλακώματα το <span class="num" data-k="pinBalanceAt10.0.win">–</span>%· με τρία λιγότερα το <span class="num" data-k="pinBalanceAt10.-3.win">–</span>%.</div></li>
+    <li><div><b>Μην αφήνεις ποτέ τη μάνα σου μόνη εκεί που φτάνει ο αντίπαλος.</b> Μια μοναχή μάνα στο βεληνεκές του υπολογιστή πλακώνεται ήδη στην επόμενη ζαριά
+      το <span class="num" data-k="loneMother.pinnedNextRoll">–</span>% των φορών — και αυτό είναι διπλή ήττα.</div></li>
+    <li><div><b>Κάθε μοναχό πούλι είναι στόχος.</b> Χωρίς κανένα μοναχό πούλι στο βεληνεκές του αντιπάλου μετά από δέκα ζαριές κερδίζεις το <span class="num" data-k="loneCheckersAt10.0.win">–</span>%·
+      με δύο, το <span class="num" data-k="loneCheckersAt10.2.win">–</span>%.</div></li>
+    <li><div><b>Τα διπλά είναι συνηθισμένα.</b> Το <span class="num" data-k="ends.mars">–</span>% των παρτίδων τελειώνει με μαρς και το <span class="num" data-k="ends.mother">–</span>% με πλακωμένη μάνα:
+      παίζε για το μεγάλο κέρδος και φυλάξου από τη μεγάλη ήττα.</div></li>
+  </ol>
+</section>
+
+<section class="card" id="map-el">
+  <p class="kicker">Προσανατολισμός</p>
+  <h2>Το ταμπλό από τη θέση σου</h2>
+  <p>Τα νούμερα είναι <b>τα δικά σου</b> σημεία, όπως είναι τυπωμένα στο πλαίσιο (Settings → Point numbers): η αφετηρία σου είναι το 1, πάνω δεξιά, και το σπίτι σου το 19–24, κάτω δεξιά.
+  Ο υπολογιστής έρχεται από την <b>αντίθετη μεριά</b>: ξεκινά από το δικό σου 24 — μέσα στο σπίτι σου — και το σπίτι του είναι το δικό σου 1–6, ακριβώς εκεί που ξεκινάς εσύ.
+  Έτσι κάθε πούλι σου συναντά κατά μέτωπο κάθε πούλι του, και η αφετηρία του καθενός βρίσκεται μέσα στο σπίτι του άλλου.</p>
+  <div class="fig" data-fig="boardMap"></div>
+  <div class="legend"><span><i style="background:var(--gold)"></i>η δική σου διαδρομή, 1 → 24 και έξω</span><span><i style="background:var(--silver)"></i>η διαδρομή του υπολογιστή</span></div>
+</section>
+
+<section class="card" id="pins-el">
+  <p class="kicker">Κεφάλαιο 1</p>
+  <h2>Τα πλακώματα κρίνουν την παρτίδα</h2>
+  <p>Ένα πλακωμένο πούλι δεν κουνιέται, το σημείο του γίνεται του αντιπάλου, και η πλευρά του έχει ένα πούλι λιγότερο για να παίξει.
+  Όποιος πλακώνει πρώτος κερδίζει το <span class="num" data-k="firstPinnerWins">–</span>% των φορών, και η διαφορά στα πλακώματα μετά από δέκα ζαριές προβλέπει το αποτέλεσμα καλύτερα από οτιδήποτε άλλο μετρήσαμε:</p>
+  <div class="bars" data-fig="pinBars"></div>
+  <p class="cap">Ποσοστό νίκης ανά διαφορά πλακωμάτων (όσα κρατάς μείον όσα έχεις υποστεί), μετά τη δέκατη ζαριά κάθε πλευράς (Advanced εναντίον Advanced, <span data-k="games">–</span> παρτίδες).</p>
+  <h3>Πού να πλακώνεις</h3>
+  <p>Κάθε πλάκωμα αξίζει. Τα πλακώματα πουλιών του υπολογιστή που είχαν ακόμη πολύ δρόμο δεν φάνηκαν να αξίζουν μετρήσιμα περισσότερο από εκείνα κοντά στο τέλος της διαδρομής του — όποιος πλάκωσε κέρδισε περίπου δύο στις τρεις παρτίδες, όπου κι αν έγινε το πλάκωμα:</p>
+  <div class="bars" data-fig="pinWhere"></div>
+  <p class="cap">Ποσοστό νίκης της πλευράς που πλάκωσε, ανάλογα με το πόσους πόντους είχε ακόμη να διανύσει το πλακωμένο πούλι (κάθε πλάκωμα του δείγματος).</p>
+  <div class="callout">Ένα πλάκωμα κρατά μόνο όσο μένει ένα πούλι σου σε εκείνο το σημείο. Φέρε και δεύτερο πούλι και θα μπορείς να κουνήσεις το ένα χωρίς να το αφήσεις.</div>
+</section>
+
+<section class="card" id="mother-el">
+  <p class="kicker">Κεφάλαιο 2</p>
+  <h2>Η μάνα</h2>
+  <p><b>Μάνα</b> είναι το τελευταίο σου πούλι στην αφετηρία. Αν πλακωθεί εκεί, χάνεις διπλό — εκτός αν ο αντίπαλος έχει ακόμη πούλια στη δική του αφετηρία·
+  τότε η παρτίδα συνεχίζεται μέχρι να την αδειάσει (και τότε χάνεις διπλό) ή να του πλακώσεις κι εσύ τη μάνα (ισοπαλία).</p>
+  <div class="facts">
+    <div class="fact"><div class="big"><span data-k="loneMother.pinnedNextRoll">–</span>%</div><div class="lbl">των φορών που μια μοναχή μάνα ήταν στο βεληνεκές του αντιπάλου, πλακώθηκε ήδη στην επόμενη ζαριά</div></div>
+    <div class="fact"><div class="big"><span data-k="motherExposed.win">–</span>%</div><div class="lbl">νίκες για όποιον άφησε έστω και μία φορά τη μάνα του μόνη στο βεληνεκές του αντιπάλου (<span data-k="motherExposed.winNever">–</span>% για όσους δεν το έκαναν ποτέ)</div></div>
+    <div class="fact"><div class="big"><span data-k="ends.mother">–</span>%</div><div class="lbl">όλων των παρτίδων τελείωσαν με πλακωμένη μάνα</div></div>
+  </div>
+  <p>Τα πούλια του υπολογιστή περνούν δίπλα από την αφετηρία σου για να πάνε σπίτι τους, και το σπίτι του <i>είναι</i> η δική σου γωνία εκκίνησης· ο κίνδυνος λοιπόν μεγαλώνει όσο προχωρά η παρτίδα.
+  Βγάλε τα δύο τελευταία πούλια της αφετηρίας στην ίδια ζαριά όποτε μπορείς, και κράτα τουλάχιστον δύο εκεί όσο ο υπολογιστής έχει πούλια 1–12 πόντους πριν από αυτήν.</p>
+  <div class="callout warn">Το ανάποδο είναι η δική σου ευκαιρία: αν η μάνα του υπολογιστή είναι μόνη και η δική σου αφετηρία άδεια, πλακώνοντάς την κερδίζεις διπλό επί τόπου.</div>
+</section>
+
+<section class="card" id="safety-el">
+  <p class="kicker">Κεφάλαιο 3</p>
+  <h2>Μοναχά πούλια</h2>
+  <p>Δύο πούλια σε ένα σημείο είναι ασφαλή· ένα είναι στόχος. Ένα μοναχό πούλι που ήδη πλακώνει είναι κι αυτό ασφαλές — δεν πλακώνεται.
+  Μετά από δέκα ζαριές ο καθένας, όσο περισσότερα μοναχά πούλια σου ήταν στο βεληνεκές του υπολογιστή, τόσο χειρότερα πήγες:</p>
+  <div class="bars" data-fig="blotBars"></div>
+  <p class="cap">Ποσοστό νίκης ανάλογα με το πόσα μοναχά πούλια σου μπορούσε να φτάσει ο υπολογιστής (1–12 πόντοι) μετά τη δέκατη ζαριά σου.</p>
+  <p>Αυτό δεν σημαίνει «ποτέ μοναχό πούλι». Οι ρυθμισμένοι υπολογιστές έμαθαν να δέχονται κάποιο ρίσκο: ένα μοναχό πούλι που κλείνει τον δρόμο του υπολογιστή, ή που δεν το φτάνει τίποτα, μπορεί να αξίζει.
+  Αυτό που χάνει παρτίδες είναι ένα μοναχό πούλι με πολλά πούλια του υπολογιστή ακριβώς από πίσω του.</p>
+</section>
+
+<section class="card" id="end-el">
+  <p class="kicker">Κεφάλαιο 4</p>
+  <h2>Πώς τελειώνουν οι παρτίδες</h2>
+  <div class="bars" data-fig="endBars"></div>
+  <p class="cap">Πώς τελείωσαν οι <span data-k="games">–</span> παρτίδες του δείγματος. Μέση διάρκεια: <span data-k="avgTurns">–</span> ζαριές (και των δύο).</p>
+  <p>Το μαρς (ο χαμένος δεν έχει μαζέψει κανένα πούλι) μετρά διπλό, όπως και η πλακωμένη μάνα. Η ισοπαλία — και οι δύο μάνες πλακωμένες — είναι πολύ σπάνια. Όποιος παίζει πρώτος κερδίζει το <span class="num" data-k="starterWins">–</span>% των παρτίδων με νικητή: η πρώτη κίνηση μετρά λίγο.</p>
+</section>
+
+<section class="card" id="learn-el">
+  <p class="kicker">Εξάσκηση</p>
+  <h2>Μάθηση στην εφαρμογή</h2>
+  <ul>
+    <li><b>Learn</b> — εννέα σύντομα μαθήματα, ένας κανόνας το καθένα, πάνω στο ταμπλό.</li>
+    <li><b>Mr. Makis</b> (μέσα στην παρτίδα) — παίζει την καλύτερη κίνηση που βρίσκει και την εξηγεί: πλακώματα, μάνα, μοναχά πούλια σε κίνδυνο.</li>
+    <li><b>Puzzles</b> — θέσεις από παρτίδες υπολογιστών όπου μία κίνηση είναι καθαρά η καλύτερη, επιβεβαιωμένη με εκατοντάδες προσομοιώσεις.</li>
+    <li><b>Review my mistakes</b> (μετά την παρτίδα) — ο Mr. Makis βρίσκει τις ακριβότερες κινήσεις σου και τις δείχνει στην επανάληψη.</li>
+    <li><b>Settings → Show winning chances</b> — οι πιθανότητες της θέσης όπως είναι, για να βλέπεις πόσο αξίζει ένα πλάκωμα.</li>
+  </ul>
+</section>
+
+<section class="card" id="method-el">
+  <p class="kicker">Μέθοδος</p>
+  <h2>Πώς μετρήθηκαν</h2>
+  <p>Κάθε νούμερο βγαίνει από <span data-k="games">–</span> παρτίδες του επιπέδου Advanced εναντίον του εαυτού του (σταθερά ζάρια, ώστε τα νούμερα να αναπαράγονται ακριβώς):
+  <code>node test/strategy-stats.mjs <span data-k="games">–</span> <span data-k="level">–</span></code> στον κώδικα του παιχνιδιού. Περιγράφουν τι κερδίζει ανάμεσα σε δυνατούς παίκτες, όχι κανόνες· ένα νούμερο μετρά συσχέτιση, όχι αιτία.</p>
+</section>
+</div>
+
+<footer>
+  <p data-lang="en">Plakoto · <a href="./">plakoto.vichos.org</a> · also <a href="https://fevga.vichos.org">Fevga</a></p>
+  <p data-lang="el" hidden>Πλακωτό · <a href="./">plakoto.vichos.org</a> · και <a href="https://fevga.vichos.org">Φεύγα</a></p>
+</footer>
+</div>
+
+<script>
+// Back: when the game opened this page in a new tab, close it so the game tab (and its state) is where you return.
+// Inside an app frame the guide is a sheet over the game (an iframe): ask the game to close it.
+document.getElementById('back').addEventListener('click', (e) => {
+  if (window.parent !== window) { e.preventDefault(); window.parent.postMessage('plakoto:close-strategy', location.origin); return; }
+  if (window.opener && !window.opener.closed) { e.preventDefault(); window.close(); }
+});
+
+// The measured figures: the output of `node test/strategy-stats.mjs 3000 4`, pasted verbatim.
+// test/strategy-check.mjs reruns the script and fails if this block differs.
+const DATA = /*DATA*/{"games":3000,"level":4,"avgTurns":91.4,"ends":{"single":54.7,"mars":34.5,"mother":10.6,"tie":0.2,"unfinished":0},"starterWins":52,"firstPinnerWins":67.4,"pinWinByPipsLeft":{"1-6":{"pins":1797,"pinnerWins":68},"7-12":{"pins":7012,"pinnerWins":68.8},"13-18":{"pins":11799,"pinnerWins":67.4},"19-24":{"pins":6387,"pinnerWins":67.6}},"loneMother":{"exposedTurns":728,"pinnedNextRoll":45.5,"motherGamesAfterExposure":317},"motherExposed":{"sides":644,"share":10.8,"win":32.3,"winNever":52.1},"pinBalanceAt10":{"0":{"n":1726,"win":49.2},"1":{"n":1097,"win":65},"2":{"n":590,"win":75.6},"3":{"n":494,"win":89.3},"-3":{"n":446,"win":11.2},"-2":{"n":559,"win":22},"-1":{"n":1073,"win":34.6}},"loneCheckersAt10":{"0":{"n":3788,"win":52.4},"1":{"n":1898,"win":46.3},"2":{"n":281,"win":42.3},"3":{"n":17,"win":52.9},"4":{"n":1,"win":100}}}/*/DATA*/;
+
+const get = (path) => path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), DATA);
+const fmt = (x, lang) => (typeof x === 'number' ? x.toLocaleString(lang === 'el' ? 'el' : 'en', { maximumFractionDigits: 1 }) : '–');
+
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, text) => {
+  const n = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs || {})) n.setAttribute(k, v);
+  if (text != null) n.textContent = text;
+  return n;
+};
+const T = {
+  en: { youStart: 'your start (1)', youHome: 'your home 19–24', cpuStart: "computer's start (your 24)", cpuHome: "computer's home (your 1–6)",
+    win: 'win', pins: (k) => (k > 0 ? `+${k} pin${k > 1 ? 's' : ''}` : k < 0 ? `${k} pin${k < -1 ? 's' : ''}` : 'level'),
+    lone: (k) => `${k} lone`, pips: (b) => `${b} pips to go`, ends: { single: 'single win', mars: 'mars (double)', mother: 'mother pinned (double)', tie: 'tie' },
+    nOf: (n) => `${n} pins` },
+  el: { youStart: 'η αφετηρία σου (1)', youHome: 'το σπίτι σου 19–24', cpuStart: 'αφετηρία υπολογιστή (το 24 σου)', cpuHome: 'σπίτι υπολογιστή (το 1–6 σου)',
+    win: 'νίκη', pins: (k) => (k > 0 ? `+${k} πλακ.` : k < 0 ? `${k} πλακ.` : 'ίσα'),
+    lone: (k) => `${k} μοναχά`, pips: (b) => `${b} πόντοι ακόμη`, ends: { single: 'απλή νίκη', mars: 'μαρς (διπλό)', mother: 'πλακωμένη μάνα (διπλό)', tie: 'ισοπαλία' },
+    nOf: (n) => `${n} πλακώματα` },
+};
+
+// the board from the player's seat: points 1-12 along the far rail (right to left), 13-24 along the near rail
+function boardMap(host, lang) {
+  const t = T[lang], W = 640, H = 390;
+  const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `${t.youStart}, ${t.youHome}, ${t.cpuStart}, ${t.cpuHome}` });
+  const fy0 = 36, fy1 = H - 36; // the board frame; region labels sit in the margins above and below
+  svg.append(el('rect', { x: 10, y: fy0, width: W - 20, height: fy1 - fy0, rx: 14, fill: 'var(--wood)', stroke: '#1a0f08', 'stroke-width': 3 }));
+  const pw = 44, x0 = 30, bar = 20, top = fy0 + 22, len = 92, bottom = fy1 - 22;
+  const px = (k) => x0 + k * pw + (k >= 6 ? bar : 0) + pw / 2; // k = 0..11 from the left
+  for (let k = 0; k < 12; k++) {
+    const cx = px(k);
+    svg.append(el('path', { d: `M${cx - pw / 2 + 2} ${top}L${cx + pw / 2 - 2} ${top}L${cx} ${top + len}Z`, fill: k % 2 ? 'var(--pa)' : 'var(--pb)', opacity: 0.85 }));
+    svg.append(el('path', { d: `M${cx - pw / 2 + 2} ${bottom}L${cx + pw / 2 - 2} ${bottom}L${cx} ${bottom - len}Z`, fill: k % 2 ? 'var(--pb)' : 'var(--pa)', opacity: 0.85 }));
+    // far rail: point 12 on the left ... 1 on the right; near rail: 13 on the left ... 24 on the right
+    svg.append(el('text', { x: cx, y: top - 7, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--dim)' }, String(12 - k)));
+    svg.append(el('text', { x: cx, y: bottom + 16, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--dim)' }, String(13 + k)));
+  }
+  const defs = el('defs');
+  for (const [id, c] of [['mg', '#e8b75a'], ['ms', '#b9c3cc']]) {
+    const m = el('marker', { id, viewBox: '0 0 10 10', refX: 6, refY: 5, markerWidth: 4, markerHeight: 4, orient: 'auto' });
+    m.append(el('path', { d: 'M0 0L10 5L0 10Z', fill: c }));
+    defs.append(m);
+  }
+  svg.prepend(defs);
+  const arrow = (d, color, id) => svg.append(el('path', { d, fill: 'none', stroke: color, 'stroke-width': 4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'marker-end': `url(#${id})` }));
+  // four lanes between the point tips: yours on the outside, the computer's inside
+  const yA = top + len + 14, yB = top + len + 32, yC = bottom - len - 32, yD = bottom - len - 14;
+  const L = px(0) - 4, Rt = px(11) + 8;
+  // yours: from 1 (far right) leftwards, round the left end, then rightwards to 24 and off
+  arrow(`M${Rt} ${yA}L${L + 26} ${yA}Q${L - 6} ${yA} ${L - 6} ${(yA + yD) / 2}Q${L - 6} ${yD} ${L + 26} ${yD}L${Rt} ${yD}`, '#e8b75a', 'mg');
+  // the computer's: from your 24 (near right) leftwards, round the left end, then rightwards to your 1-6 and off
+  arrow(`M${Rt - 4} ${yC}L${L + 40} ${yC}Q${L + 16} ${yC} ${L + 16} ${(yB + yC) / 2}Q${L + 16} ${yB} ${L + 40} ${yB}L${Rt - 4} ${yB}`, '#b9c3cc', 'ms');
+  // start markers on the two start points
+  svg.append(el('circle', { cx: px(11), cy: top + 12, r: 9, fill: '#f4ead8', stroke: '#e8b75a', 'stroke-width': 2.5 }));
+  svg.append(el('circle', { cx: px(11), cy: bottom - 12, r: 9, fill: '#3b2618', stroke: '#b9c3cc', 'stroke-width': 2.5 }));
+  // region labels in the margins, over / under the right half
+  const half = (px(6) + px(11)) / 2;
+  const two = (y, a, ca, b, cb) => {
+    const tx = el('text', { x: half, y, 'text-anchor': 'middle', 'font-size': 12.5, 'font-weight': 600 });
+    tx.append(el('tspan', { fill: ca }, a), el('tspan', { fill: 'var(--dim)' }, '  ·  '), el('tspan', { fill: cb }, b));
+    svg.append(tx);
+  };
+  two(22, t.youStart, '#e8b75a', t.cpuHome, '#b9c3cc');
+  two(H - 12, t.youHome, '#e8b75a', t.cpuStart, '#b9c3cc');
+  host.append(svg);
+}
+
+function bars(host, lang, rows) { // rows: [[label, value 0..100, sub, low?]]
+  for (const [k, v, sub, low] of rows) {
+    const kk = document.createElement('div'); kk.className = 'k'; kk.textContent = k;
+    const tr = document.createElement('div'); tr.className = 'track';
+    const f = document.createElement('div'); f.className = 'fill' + (low ? ' lo' : ''); f.style.width = `${Math.max(0, Math.min(100, v))}%`;
+    tr.append(f);
+    const vv = document.createElement('div'); vv.className = 'v'; vv.innerHTML = `${fmt(v, lang)}%${sub ? ` <small>${sub}</small>` : ''}`;
+    host.append(kk, tr, vv);
+  }
+}
+
+function draw(host, fig, lang) {
+  const t = T[lang];
+  host.textContent = '';
+  if (fig === 'boardMap') boardMap(host, lang);
+  else if (fig === 'pinBars') bars(host, lang, Object.entries(DATA.pinBalanceAt10 || {}).sort((a, b) => +b[0] - +a[0]).map(([k, x]) => [t.pins(+k), x.win, `n=${x.n}`, +k < 0]));
+  else if (fig === 'pinWhere') bars(host, lang, Object.entries(DATA.pinWinByPipsLeft || {}).map(([k, x]) => [t.pips(k), x.pinnerWins, t.nOf(x.pins)]));
+  else if (fig === 'blotBars') bars(host, lang, Object.entries(DATA.loneCheckersAt10 || {}).filter(([, x]) => x.n >= 100).map(([k, x]) => [t.lone(+k), x.win, `n=${x.n}`, +k > 0]));
+  else if (fig === 'endBars') bars(host, lang, ['single', 'mars', 'mother', 'tie'].map((k) => [t.ends[k], (DATA.ends || {})[k], '', false]));
+}
+
+function render(lang) {
+  for (const n of document.querySelectorAll(`[data-lang="${lang}"] [data-k], footer [data-k]`)) n.textContent = fmt(get(n.dataset.k), lang);
+  for (const host of document.querySelectorAll(`[data-lang="${lang}"] [data-fig]`)) if (!host.dataset.drawn) { draw(host, host.dataset.fig, lang); host.dataset.drawn = '1'; }
+}
+
+// Language: ?lang=el|en wins, then the last choice on this browser, then the browser's own language.
+const TITLES = { en: 'Plakoto - Strategy guide', el: 'Πλακωτό - Οδηγός στρατηγικής' };
+function setLang(lang, remember) {
+  for (const n of document.querySelectorAll('[data-lang]')) n.hidden = n.dataset.lang !== lang;
+  for (const b of document.querySelectorAll('[data-set-lang]')) {
+    b.classList.toggle('on', b.dataset.setLang === lang);
+    b.setAttribute('aria-pressed', b.dataset.setLang === lang);
+  }
+  document.documentElement.lang = lang;
+  document.title = TITLES[lang];
+  render(lang);
+  if (remember) try { localStorage.setItem('plakoto.strategy.lang', lang); } catch {}
+}
+for (const b of document.querySelectorAll('[data-set-lang]')) b.addEventListener('click', () => setLang(b.dataset.setLang, true));
+let initial = new URLSearchParams(location.search).get('lang');
+if (!T[initial]) { try { initial = localStorage.getItem('plakoto.strategy.lang'); } catch { initial = null; } }
+if (!T[initial]) initial = (navigator.language || '').toLowerCase().startsWith('el') ? 'el' : 'en';
+setLang(initial, false);
+if (location.hash) {
+  const id = location.hash.slice(1).replace(/-el$/, '');
+  const target = document.getElementById(initial === 'el' ? `${id}-el` : id);
+  if (target) target.scrollIntoView();
+}
+</script>
+</body>
+</html>

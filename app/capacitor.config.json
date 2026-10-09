@@ -1,0 +1,9 @@
+{
+  "appId": "org.vichos.plakoto",
+  "appName": "Plakoto",
+  "webDir": "www",
+  "backgroundColor": "#0b0807",
+  "android": {
+    "allowMixedContent": false
+  }
+}
