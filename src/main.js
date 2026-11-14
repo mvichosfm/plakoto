@@ -10,7 +10,7 @@ import {
 import { PUZZLES } from './puzzles.js';
 import { aoTexture, ringTexture, triGlowTexture, dieTextures, boardShadowTexture } from './textures.js';
 import { THEMES, themeById, SURFACES, SURFACE_SIZE, makeSurface } from './themes.js';
-import { loadGames, storeGames, upsertRecent, saveNamed, renameSaved, deleteSaved, newId, stepsText, shown, resultText, fmtDate, MAX_SAVED, toVbg, parseVbg, vbgFileName, VBG_MAX_BYTES, toVbs, parseVbs, vbsFileName, VBS_MAX_BYTES } from './records.js';
+import { loadGames, storeGames, upsertRecent, saveNamed, renameSaved, deleteSaved, newId, stepsText, shown, resultText, resultWord, fmtDate, MAX_SAVED, toVbg, parseVbg, vbgFileName, VBG_MAX_BYTES, toVbs, parseVbs, vbsFileName, VBS_MAX_BYTES } from './records.js';
 import { Sound } from './sound.js';
 import { createTrails, createConfetti } from './effects.js';
 import { LESSONS, lessonBoard, lessonSteps } from './lessons.js';
@@ -118,7 +118,22 @@ const diceRest = (i) => new THREE.Vector3(-(OFF_X + 1) + i * 2.2 * DSP, TABLE_Y 
 
 // ================================================================ renderer / scene
 const canvas = $('scene');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+// start-up failed: say so on the loading veil instead of leaving "Setting up the board" up forever
+function bootFailed(msg) {
+  const v = $('veil');
+  if (!v || v.classList.contains('hidden')) return;
+  const s = v.querySelector('.s');
+  if (!s) return;
+  s.textContent = msg;
+  s.style.cssText = 'text-transform:none;letter-spacing:0;text-align:center;max-width:30em;padding:0 24px;line-height:1.5';
+}
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+} catch (e) {
+  bootFailed('This browser or device cannot show the 3D board (WebGL 2 is not available). Try another browser or device.');
+  throw e;
+}
 let pixelRatio = Math.min(window.devicePixelRatio, 1.5);
 renderer.setPixelRatio(pixelRatio);
 renderer.shadowMap.enabled = true;
@@ -540,8 +555,10 @@ function setRest(mesh, v) {
   mesh.userData.ao.visible = v.y < 0.05 || (v.y <= TABLE_Y + 0.05);
 }
 
+let layoutGen = 0; // bumped by every layoutCheckers: a move still in flight must not write its old target back
 // Puts the 30 checkers where game g says, dropping them in from above.
 function layoutCheckers(g, animate) {
+  layoutGen++;
   for (const s of stacks) s.length = 0;
   offStacks[0].length = 0; offStacks[1].length = 0;
   const pool = [allCheckers.filter((c) => c.userData.p === 0), allCheckers.filter((c) => c.userData.p === 1)];
@@ -608,14 +625,16 @@ async function moveChecker(p, from, to) {
   mesh.userData.ao.visible = false;
   mesh.userData.lift = 0;
   sound.click();
+  const gen = layoutGen;
   await animateFn(dur, (k) => {
     const e = easeInOut(k);
     mesh.position.lerpVectors(start, target, e);
     mesh.position.y += arc * 4 * k * (1 - k);
   });
+  mesh.userData.anim--;
+  if (gen !== layoutGen) return null; // the board was laid out again meanwhile (new game, replay exit, puzzle): that layout owns this checker now
   setRest(mesh, target);
   mesh.position.copy(target);
-  mesh.userData.anim--;
   sound.place();
   if (pins) sound.tok(0.55, 380); // a pin lands with a heavier knock
   return { start, target, pins }; // (the computer's last-move trails are drawn from these)
@@ -1111,6 +1130,7 @@ async function playForced(steps) {
     if (my !== gid || T !== myT) return;
     if (mv) trails.add(mv.start, mv.target);
     await wait(0.12);
+    if (my !== gid || T !== myT) return;
   }
   trails.release(4);
   await wait(0.5);
@@ -1266,6 +1286,7 @@ async function cpuTurn(preset = null) {
   if (!steps.length) {
     setStatus(`Computer rolled ${diceLabel(curDice)} — no legal move`);
     await wait(1.4);
+    if (my !== gid) return;
   } else {
     setStatus(`Computer plays ${diceLabel(curDice)}`);
     trails.clear(); // the previous turn's markers make way for this one's
@@ -1282,6 +1303,7 @@ async function cpuTurn(preset = null) {
       if (my !== gid) return;
       if (mv) trails.add(mv.start, mv.target);
       await wait(0.12);
+      if (my !== gid) return;
     }
   }
   trails.release(4); // stay a few seconds into the human's turn, then fade
@@ -1891,7 +1913,7 @@ window.addEventListener('keydown', (e) => {
   }
   if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
   if (!$('games').classList.contains('hidden')) { if (e.key === 'Escape') { editing = null; $('games').classList.add('hidden'); } return; }
-  if (!$('settings').classList.contains('hidden') && e.key !== 'Escape') return; // no game keys behind the sheet
+  if (['settings', 'rules', 'puzzles'].some((id) => !$(id).classList.contains('hidden')) && e.key !== 'Escape') return; // no game keys behind a sheet
   if (phase === 'replay') {
     if (e.key === 'ArrowRight') replayStep();
     else if (e.key === 'ArrowLeft') replayJump(replay.idx - 1);
@@ -1916,8 +1938,8 @@ window.addEventListener('keydown', (e) => {
   else if (e.key === 'l' || e.key === 'L') setLamp(!lampOn);
   else if (e.key === '[') setLight(lightLevel - 0.1);
   else if (e.key === ']') setLight(lightLevel + 0.1);
-  else if (e.key === 'Escape' && puzzle && $('rules').classList.contains('hidden') && $('settings').classList.contains('hidden')) exitPuzzle();
-  else if (e.key === 'Escape') { select(-1); $('rules').classList.add('hidden'); $('settings').classList.add('hidden'); }
+  else if (e.key === 'Escape' && puzzle && $('rules').classList.contains('hidden') && $('settings').classList.contains('hidden') && $('puzzles').classList.contains('hidden')) exitPuzzle();
+  else if (e.key === 'Escape') { select(-1); $('rules').classList.add('hidden'); $('settings').classList.add('hidden'); $('puzzles').classList.add('hidden'); }
 });
 
 $('rollBtn').onclick = roll;
@@ -2665,7 +2687,7 @@ $('rulesAbout').onclick = () => { $('rules').classList.add('hidden'); showHero()
 // ================================================================ games sheet (recent + saved)
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const metaLine = (r) => `${r.imported ? 'loaded from a .vbg file · ' : ''}${fmtDate(r.date)} · vs ${LEVELS[(r.level || 3) - 1].name} · ${r.imported ? 'player' : 'you'} ${r.human === 1 ? 'black' : 'white'} · ${resultText(r)}${r.match ? ` (match ${r.match.after[0]}–${r.match.after[1]} of ${r.match.to})` : ''} · ${r.turns.length} turns`;
-const defaultName = (r) => `${r.result ? (r.result.winner === 'you' ? 'Win' : 'Loss') : 'Game'} vs ${LEVELS[(r.level || 3) - 1].name} · ${fmtDate(r.date)}`;
+const defaultName = (r) => `${resultWord(r)} vs ${LEVELS[(r.level || 3) - 1].name} · ${fmtDate(r.date)}`;
 let editing = null; // { kind: 'save-recent' | 'save-current' | 'rename' | 'delete', id }
 
 function renderGames() {
@@ -3351,7 +3373,7 @@ async function boot() {
   startGame();
   if (heroOpen()) $('heroPlay').focus(); // (first visit: Enter or Space starts playing)
 }
-boot();
+boot().catch((e) => { console.error(e); bootFailed('The board could not be set up. Reload the page to try again.'); });
 
 // console / test hook
 window.__plakoto = {

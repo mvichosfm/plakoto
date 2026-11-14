@@ -62,6 +62,9 @@ export function resultText(rec) {
   return rec.result.winner === 'you' ? `${rec.imported ? 'player' : 'you'} won ${pts}` : `computer won ${pts}`;
 }
 
+// One word for a game's suggested save name: Win / Loss / Tie, or Game while it is unfinished.
+export const resultWord = (rec) => (!rec.result ? 'Game' : rec.result.winner === 'tie' ? 'Tie' : rec.result.winner === 'you' ? 'Win' : 'Loss');
+
 // ---------------------------------------------------------------- .vbg game files
 // A .vbg file is UTF-8 JSON: { format: "plakoto-vbg", version: 1, app, exportedAt, game } where
 // game = { name, date, level, human, opening, openingPlay, turns: [{ p, dice, steps:[{r,t,d}] }] }.
@@ -178,7 +181,8 @@ export function parseVbs(text) {
   return { setup, favourites };
 }
 
-export const vbsFileName = () => `plakoto-settings-${new Date().toISOString().slice(0, 10)}.vbs`;
+// the player's own calendar date (toISOString would give the UTC date: yesterday's, just after midnight east of Greenwich)
+export const vbsFileName = (d = new Date()) => `plakoto-settings-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.vbs`;
 
 export function fmtDate(ts) {
   const d = new Date(ts), now = new Date();

@@ -409,7 +409,7 @@ ok(absOf(0, 24) === 23 && absOf(1, 1) === 23 && absOf(1, 24) === 0 && absOf(0, 1
 
 // 19. .vbs settings files: round-trip, clamping of hostile values, refusal of other files
 {
-  const { toVbs, parseVbs } = await import('../src/records.js');
+  const { toVbs, parseVbs, vbsFileName } = await import('../src/records.js');
   const setup = { level: 4, color: 1, light: 0.6, lamp: true, freeCam: false, view: [40, 60, 100], theme: 'olive', numbers: false, trails: false, round: true, total: true, odds: true, muted: true, autoEnd: true, quick: true, autoRoll: true, forced: false, openingPlay: true, match: true };
   const back = parseVbs(toVbs(setup, [{ name: 'Night', s: setup }]));
   ok(JSON.stringify(back.setup) === JSON.stringify(setup) && back.favourites.length === 1 && back.favourites[0].name === 'Night', '.vbs round-trips');
@@ -420,6 +420,7 @@ ok(absOf(0, 24) === 23 && absOf(1, 1) === 23 && absOf(1, 24) === 0 && absOf(0, 1
   ok(evil.setup.autoRoll === false, 'auto-roll is off unless exactly true (older files lack it)');
   ok(evil.setup.forced === true, 'forced moves play themselves unless exactly false (older files lack it)');
   ok(!!parseVbs('{"format":"plakoto-vbg","version":1}').error && !!parseVbs('nope').error, 'non-settings files refused');
+  ok(vbsFileName(new Date(2031, 0, 1, 0, 30)) === 'plakoto-settings-2031-01-01.vbs' && vbsFileName(new Date(2031, 0, 1, 23, 30)) === 'plakoto-settings-2031-01-01.vbs', `settings file is named after the local date (${vbsFileName(new Date(2031, 0, 1, 0, 30))})`);
 }
 
 // 20. records: resigned games read as conceded
@@ -427,6 +428,10 @@ ok(absOf(0, 24) === 23 && absOf(1, 1) === 23 && absOf(1, 24) === 0 && absOf(0, 1
   const { resultText } = await import('../src/records.js');
   ok(resultText({ result: { winner: 'cpu', points: 2, resigned: true } }) === 'you admitted the loss, computer +2', 'resigned result text');
   ok(resultText({ result: { winner: 'you', points: 2, how: 'off' } }) === 'you won +2 (mars)', 'mars result text');
+  // the word a game's suggested save name starts with
+  const { resultWord } = await import('../src/records.js');
+  ok(typeof resultWord === 'function' && resultWord({ result: { winner: 'tie', points: 0, how: 'tie' } }) === 'Tie', 'a tied game is named Tie, not Loss');
+  ok(typeof resultWord === 'function' && resultWord({ result: { winner: 'you', points: 1 } }) === 'Win' && resultWord({ result: { winner: 'cpu', points: 2, resigned: true } }) === 'Loss' && resultWord({ result: null }) === 'Game', 'win / loss / unfinished save names');
 }
 
 console.log(`${passes} passed, ${fails} failed`);

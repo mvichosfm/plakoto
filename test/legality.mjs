@@ -167,6 +167,8 @@ function audit(g, p, sample) {
       fail(`finalPositions differ: engine ${engSet.size}, reference ${refSet.size}; engine-only ${[...engSet].filter((k) => !refSet.has(k)).slice(0, 1)} reference-only ${[...refSet].filter((k) => !engSet.has(k)).slice(0, 1)}`, g, p, d);
       continue;
     }
+    // each board once: 'Play forced moves for me' treats a roll as forced when exactly one play is listed
+    if (fin.length && fin.length !== engSet.size) fail('finalPositions lists a board twice: ' + fin.length + ' plays, ' + engSet.size + ' boards', g, p, d);
     if (!fin.length) stats.noMove++;
     // every enumerated play's step list (what the computer, Hint and Mr. Makis play) must replay
     // through the interactive turn to the same board - a smaller-die step list once froze a game
